@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Speech Recognition</title>
+</head>
+<body>
+    <button id="start" onclick="startRecognition()">Start Recognition</button>
+    <button id="end" onclick="stopRecognition()">Stop Recognition</button>
+    <p id="output"></p>
+    <script>
+        const output = document.getElementById('output');
+        let recognition;
+
+        function startRecognition() {
+            const WebSpeech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!WebSpeech) {
+                output.textContent = "SpeechRecognition API not available in this browser.";
+                return;
+            }
+            recognition = new WebSpeech();
+            recognition.lang = 'hi-HI';
+            recognition.continuous = true;
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                // append a space for readability between chunks
+                output.textContent += (transcript + " ");
+            };
+
+            recognition.onerror = function(evt) {
+                console.error("Recognition error:", evt);
+            };
+
+            recognition.onend = function() {
+                // restart so it keeps listening until user clicks Stop
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error("Failed to restart recognition:", e);
+                }
+            };
+            recognition.start();
+        }
+
+        function stopRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+            // do not clear output here — let the calling automation decide.
+        }
+    </script>
+</body>
+</html>
